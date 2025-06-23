@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusDiv = document.getElementById('status');
     const downloadLink = document.getElementById('downloadLink');
 
-    // ATENÇÃO: Substitua pela URL da sua função 'generate-upload-url'
+    // URL da sua função que gera o link de upload.
     const signedUrlGeneratorUrl = "https://generate-upload-url-egxj6adibq-rj.a.run.app";
 
     let selectedFile = null;
@@ -28,16 +28,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Parte 3: Lógica de Upload (A mais importante) ---
+    // --- Parte 3: Lógica de Upload ---
     uploadButton.addEventListener('click', async () => {
         if (!selectedFile) {
             alert("Nenhum arquivo selecionado!");
             return;
         }
 
-        // Desabilita o botão para evitar múltiplos cliques
         uploadButton.disabled = true;
         uploadButton.textContent = "Enviando...";
+        downloadLink.classList.add('hidden'); // Esconde o link de download anterior
 
         try {
             // --- ETAPA A: Pedir a URL assinada para nossa função de apoio ---
@@ -45,15 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const response = await fetch(signedUrlGeneratorUrl, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ fileName: selectedFile.name }),
             });
 
-            if (!response.ok) {
-                throw new Error('Falha ao obter a URL de upload.');
-            }
+            if (!response.ok) { throw new Error('Falha ao obter a URL de upload.'); }
 
             const data = await response.json();
             const signedUrl = data.url;
@@ -64,30 +60,30 @@ document.addEventListener('DOMContentLoaded', () => {
             const uploadResponse = await fetch(signedUrl, {
                 method: 'PUT',
                 body: selectedFile,
-                headers: {
-                    'Content-Type': 'application/octet-stream'
-                }
+                headers: { 'Content-Type': 'application/octet-stream' }
             });
 
-            if (!uploadResponse.ok) {
-                throw new Error('Falha no upload do arquivo.');
-            }
+            if (!uploadResponse.ok) { throw new Error('Falha no upload do arquivo.'); }
 
             // --- ETAPA C: Sucesso! Exibir o link de download ---
-            statusDiv.innerHTML = `<p>3/3: Sucesso! Seu arquivo foi processado.</p>`;
-            uploadButton.textContent = "Concluído!";
-
-            // Monta o link para o arquivo processado no outro bucket
-            const processedFileName = `bw_${selectedFile.name}`;
-            const publicDownloadUrl = `https://storage.googleapis.com/vision-gcloud-processed/${processedFileName}`;
+            statusDiv.innerHTML = `<p>3/3: Sucesso! Aguarde o processamento ser concluído.</p>`;
             
-            downloadLink.href = publicDownloadUrl;
-            downloadLink.classList.remove('hidden'); // Mostra o botão de download
+            // Espera um pouco para dar tempo da outra função processar o arquivo
+            setTimeout(() => {
+                statusDiv.innerHTML = `<p>Processamento finalizado! Seu download está pronto.</p>`;
+                uploadButton.textContent = "Concluído!";
+
+                const processedFileName = `bw_${selectedFile.name}`;
+                const publicDownloadUrl = `https://storage.googleapis.com/vision-gcloud-processed/${processedFileName}`;
+                
+                downloadLink.href = publicDownloadUrl;
+                downloadLink.classList.remove('hidden'); // Mostra o botão de download
+            }, 5000); // Espera 5 segundos
 
         } catch (error) {
             console.error('Erro no processo:', error);
             statusDiv.innerHTML = `<p>ERRO: ${error.message}</p>`;
-            uploadButton.disabled = false; // Reabilita o botão em caso de erro
+            uploadButton.disabled = false;
             uploadButton.textContent = "Tentar Novamente";
         }
     });
