@@ -1,0 +1,17 @@
+# Arquivos de compressão
+*.zip
+
+# Arquivos de cache e compilados do Python
+__pycache__/
+*.pyc
+
+# Ambientes virtuais
+venv/
+env/
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos de configuração do editor
+.vscode/
