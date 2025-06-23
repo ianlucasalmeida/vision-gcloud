@@ -1,2 +1,5 @@
+# Para interagir com o Cloud Storage e gerar a URL assinada 
 google-cloud-storage
+
+# Biblioteca essencial que cria o servidor web para funções HTTP em Python no Google Cloud 
 functions-framework
