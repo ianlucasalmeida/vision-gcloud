@@ -3,14 +3,24 @@ from google.cloud import storage
 import datetime
 import os
 
+# Lista de origens permitidas (seu site no Firebase)
+ALLOWED_ORIGINS = [
+    'https://vision-gcloud.web.app',
+    'https://vision-gcloud.firebaseapp.com'
+]
+
 @functions_framework.http
 def generate_upload_url(request):
     """
     Função HTTP que gera uma URL assinada (Signed URL) para upload.
-    Esta é a versão final e corrigida.
+    Utiliza uma conta de serviço dedicada para assinar a URL.
     """
+    # Lógica de CORS para permitir a comunicação com o frontend
+    origin = request.headers.get('Origin')
+    cors_origin = origin if origin in ALLOWED_ORIGINS else ALLOWED_ORIGINS[0]
+    
     headers = {
-        'Access-Control-Allow-Origin': 'https://vision-gcloud.web.app',
+        'Access-Control-Allow-Origin': cors_origin,
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
     }
@@ -18,31 +28,36 @@ def generate_upload_url(request):
     if request.method == 'OPTIONS':
         return ('', 204, headers)
 
+    # --- Configurações lidas das variáveis de ambiente ---
     bucket_name = os.environ.get('UPLOAD_BUCKET_NAME')
-    if not bucket_name:
-        return ('Erro de configuração no servidor: UPLOAD_BUCKET_NAME não definido.', 500, headers)
+    signing_sa_email = os.environ.get('SIGNING_SERVICE_ACCOUNT_EMAIL')
 
+    if not bucket_name or not signing_sa_email:
+        print("ERRO: Variáveis de ambiente não configuradas corretamente.")
+        return ('Erro de configuração interna no servidor.', 500, headers)
+
+    # Validação da requisição do frontend
     request_json = request.get_json(silent=True)
     if not request_json or 'fileName' not in request_json:
-        return ('Requisição inválida. O corpo da requisição deve ser um JSON com a chave "fileName".', 400, headers)
+        return ('Requisição inválida. "fileName" não encontrado no corpo da requisição.', 400, headers)
 
     file_name = request_json['fileName']
     
+    # Geração da URL Assinada
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(file_name)
 
     try:
-        # --- CORREÇÃO FINAL ---
-        # Removemos a necessidade de especificar o email da conta de serviço.
-        # A biblioteca usará a permissão que já concedemos automaticamente.
         signed_url = blob.generate_signed_url(
             version="v4",
             expiration=datetime.timedelta(minutes=15),
             method="PUT",
-            content_type="application/octet-stream"
+            content_type="application/octet-stream",
+            # Usa a conta de serviço dedicada para assinar, evitando erros de permissão
+            service_account_email=signing_sa_email
         )
         return ({'url': signed_url}, 200, headers)
     except Exception as e:
-        print(f"ERROR: Falha ao gerar a URL assinada: {e}")
-        return (f'Erro interno ao gerar a URL.', 500, headers)
+        print(f"ERRO CRÍTICO ao gerar URL assinada: {e}")
+        return ('Erro interno ao gerar a URL.', 500, headers)

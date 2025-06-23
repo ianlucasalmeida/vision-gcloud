@@ -147,3 +147,43 @@ button:disabled {
 .hidden {
     display: none;
 }
+
+/* --- ESTILOS ADICIONAIS PARA LANDING PAGE E CARDS --- */
+
+/* Contêiner da Landing Page */
+.landing-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem; /* Espaçamento entre os cards */
+    padding: 2rem;
+}
+
+/* Estilo de cada Card */
+.card {
+    background-color: var(--secondary-bg);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    width: 100%;
+    max-width: 300px;
+    padding: 2rem;
+    text-align: center;
+    text-decoration: none; /* Remove o sublinhado do link */
+    color: var(--text-color);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-10px); /* Efeito de flutuar ao passar o mouse */
+    box-shadow: 0 8px 25px rgba(66, 133, 244, 0.5);
+}
+
+.card h2 {
+    color: var(--primary-color);
+    border-bottom: none; /* Remove a borda do H2 que tínhamos antes */
+    margin-bottom: 0.5rem;
+}
+
+.card p {
+    color: var(--light-text-color);
+}

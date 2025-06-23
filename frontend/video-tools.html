@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ferramentas de Vídeo - Vision-GCloud</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Ferramentas de Vídeo</h1>
+        <p>Extraia uma capa (thumbnail) do seu vídeo</p>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="upload-section">
+                <h2>1. Envie seu Vídeo</h2>
+                <p>Selecione um arquivo de vídeo (.mp4, .mov) para extrair o primeiro frame como capa.</p>
+                
+                <input type="file" id="videoFileInput" accept="video/mp4, video/quicktime" hidden/>
+                <label for="videoFileInput" class="file-label">Escolher Vídeo</label>
+                <span id="fileName">Nenhum arquivo selecionado</span>
+                
+                <button id="extractButton" disabled>Extrair Capa</button>
+            </div>
+
+            <div class="result-section">
+                <h2>2. Resultado</h2>
+                <div id="status">
+                    <p>Aguardando o envio do vídeo...</p>
+                </div>
+                <a href="#" id="downloadLink" class="hidden">
+                    Download da Capa (JPG)
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Vision-GCloud. <a href="index.html">Voltar para o início</a></p>
+    </footer>
+
+    </body>
+</html>
