@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vision-GCloud - Conversor de Arquivos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Vision-GCloud</h1>
+        <p>Seu Conversor de Arquivos Serverless</p>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="upload-section">
+                <h2>1. Envie seu Arquivo</h2>
+                <p>Selecione um arquivo de imagem (.jpg, .png) para converter para preto e branco.</p>
+
+                <input type="file" id="fileInput" accept="image/png, image/jpeg" hidden/>
+                <label for="fileInput" class="file-label">Escolher Arquivo</label>
+                <span id="fileName">Nenhum arquivo selecionado</span>
+
+                <button id="uploadButton" disabled>Converter Arquivo</button>
+            </div>
+
+            <div class="result-section">
+                <h2>2. Resultado</h2>
+                <div id="status">
+                    <p>Aguardando o envio do arquivo...</p>
+                </div>
+                <a href="#" id="downloadLink" class="hidden">
+                    Download do Arquivo Convertido
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Vision-GCloud. Todos os direitos reservados.</p>
+    </footer>
+
+    </body>
+</html>
