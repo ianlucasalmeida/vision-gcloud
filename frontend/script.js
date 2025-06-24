@@ -1,7 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // ===================================================================
-    // --- 1. SELEÇÃO DOS ELEMENTOS DA PÁGINA ---
-    // ===================================================================
+    // Seleção dos Elementos da Página
     const fileInput = document.getElementById('fileInput');
     const conversionTypeSelect = document.getElementById('conversionType');
     const uploadButton = document.getElementById('uploadButton');
@@ -10,73 +8,55 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusDiv = document.getElementById('status');
     const downloadLink = document.getElementById('downloadLink');
 
-    // ===================================================================
-    // --- 2. CONFIGURAÇÃO FINAL DAS URLS DO BACKEND ---
-    // ===================================================================
-    // URLs confirmadas a partir dos seus logs de deploy
+    // URLs de produção confirmadas
     const UPLOAD_URL = "https://direct-upload-file-egxj6adibq-rj.a.run.app"; 
-    const DOWNLOAD_URL_GENERATOR = "https://stream-download-file-egxj6adibq-rj.a.run.app"; // URL CORRIGIDA para a nova função de download por streaming
+    const DOWNLOAD_URL_GENERATOR = "https://stream-download-file-egxj6adibq-rj.a.run.app";
 
     let selectedFile = null;
 
-    // ===================================================================
-    // --- 3. LÓGICA DE INTERAÇÃO COM A INTERFACE ---
-    // ===================================================================
+    // Lógica de Interação com a Interface
     fileInput.addEventListener('change', (event) => {
         selectedFile = event.target.files[0];
         if (selectedFile) {
             fileNameSpan.textContent = selectedFile.name;
             uploadButton.disabled = false;
-            fileLabel.textContent = "Trocar Imagem";
         } else {
             fileNameSpan.textContent = "Nenhum arquivo selecionado";
             uploadButton.disabled = true;
-            fileLabel.textContent = "Escolher Imagem";
         }
     });
 
-    // ===================================================================
-    // --- 4. LÓGICA PRINCIPAL DE UPLOAD E PROCESSAMENTO ---
-    // ===================================================================
+    // Lógica Principal de Upload e Download
     uploadButton.addEventListener('click', async () => {
-        if (!selectedFile) {
-            alert("Por favor, selecione um arquivo primeiro.");
-            return;
-        }
+        if (!selectedFile) return;
 
-        // Reseta a interface para um novo processamento
+        // Reset da interface
         uploadButton.disabled = true;
         uploadButton.textContent = "Enviando...";
         statusDiv.innerHTML = `<p>Enviando arquivo para o servidor...</p>`;
         downloadLink.classList.add('hidden');
 
-        // Pega a opção de conversão do menu para montar o nome do arquivo
         const actionPrefix = conversionTypeSelect.value;
         const finalFileName = `${actionPrefix}_${selectedFile.name}`;
 
-        // Usa FormData para empacotar o arquivo para envio
         const formData = new FormData();
         formData.append('file', selectedFile, finalFileName);
 
         try {
-            // --- ETAPA A: Envia o arquivo para a função de upload direto ---
+            // Etapa A: Upload do ficheiro
             const uploadResponse = await fetch(UPLOAD_URL, {
                 method: 'POST',
                 body: formData,
             });
-
-            if (!uploadResponse.ok) {
-                throw new Error(`Falha no upload (Status: ${uploadResponse.status})`);
-            }
+            if (!uploadResponse.ok) throw new Error(`Falha no upload (Status: ${uploadResponse.status})`);
             
-            // --- ETAPA B: Sucesso no upload, aguarda o processamento no backend ---
-            statusDiv.innerHTML = `<p>Sucesso! O arquivo foi enviado e está sendo processado... Isso pode levar alguns segundos.</p>`;
+            // Etapa B: Aguardar processamento
+            statusDiv.innerHTML = `<p>Sucesso! O arquivo foi enviado e está sendo processado...</p>`;
             
-            // Usamos um timeout para dar tempo da função de processamento ser acionada e concluir
             setTimeout(() => {
                 statusDiv.innerHTML = `<p>Processamento finalizado! Seu download está pronto.</p>`;
                 
-                // --- ETAPA C: Monta o link de download que aponta para nossa função "porteiro" ---
+                // Etapa C: Montar o link de download
                 const originalBaseName = selectedFile.name.split('.').slice(0, -1).join('.');
                 let resultFileName;
                 
@@ -85,21 +65,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (actionPrefix === 'jpg') {
                     resultFileName = `converted_${originalBaseName}.jpg`;
                 } else {
-                    // Para P&B, Sépia, etc., que salvamos como .jpg no backend
                     resultFileName = `${actionPrefix}_${originalBaseName}.jpg`;
                 }
-
-                // O link agora aponta para a função que gera o download, passando o nome do arquivo
+                
                 const downloadUrlWithParam = `${DOWNLOAD_URL_GENERATOR}?file=${resultFileName}`;
                 
                 downloadLink.href = downloadUrlWithParam;
                 downloadLink.textContent = `Download de ${resultFileName}`;
-                downloadLink.classList.remove('hidden'); // Mostra o botão de download
+                downloadLink.classList.remove('hidden');
                 
                 uploadButton.disabled = false;
                 uploadButton.textContent = "Processar Outra Imagem";
-
-            }, 10000); // Aumentado para 10 segundos para segurança
+            }, 10000); // Espera 10 segundos
 
         } catch (error) {
             console.error('Erro no processo:', error);
