@@ -10,8 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusDiv = document.getElementById('status');
     const downloadLink = document.getElementById('downloadLink');
 
-    // IMPORTANTE: Cole a URL da sua função 'generate-upload-url' aqui
-    const signedUrlGeneratorUrl = "https://generate-upload-url-egxj6adibq-rj.a.run.app";
+    // IMPORTANTE: Cole a URL da sua NOVA função 'http-upload-file' aqui após o deploy dela.
+    const httpUploadUrl = "COLE_A_URL_DA_SUA_NOVA_FUNCAO_HTTP_UPLOAD_AQUI"; 
 
     let selectedFile = null;
 
@@ -29,55 +29,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Lógica Principal de Upload e Processamento ---
+    // --- Lógica Principal de Upload (Método Simplificado) ---
     uploadButton.addEventListener('click', async () => {
         if (!selectedFile) {
             alert("Por favor, selecione um arquivo primeiro.");
             return;
         }
 
-        // Desabilita o botão para evitar múltiplos envios
+        // Desabilita o botão e atualiza o status
         uploadButton.disabled = true;
-        uploadButton.textContent = "Processando...";
-        downloadLink.classList.add('hidden'); // Esconde o link de download anterior
+        uploadButton.textContent = "Enviando...";
+        downloadLink.classList.add('hidden');
+        statusDiv.innerHTML = `<p>Enviando arquivo para o servidor...</p>`;
 
-        // Lê a opção de conversão escolhida pelo usuário no menu dropdown
+        // Pega a opção de conversão para montar o nome do arquivo final
         const actionPrefix = conversionTypeSelect.value;
-        // Monta o nome do arquivo com o prefixo para o backend saber o que fazer
         const finalFileName = `${actionPrefix}_${selectedFile.name}`;
 
+        // Cria um objeto FormData para encapsular o arquivo
+        const formData = new FormData();
+        formData.append('file', selectedFile, finalFileName);
+
         try {
-            // ETAPA A: Pedir a URL assinada para nossa função de apoio
-            statusDiv.innerHTML = `<p>1/3: Solicitando permissão de upload...</p>`;
-            
-            const response = await fetch(signedUrlGeneratorUrl, {
+            // --- ETAPA ÚNICA: Enviar o arquivo diretamente para a função de upload ---
+            const response = await fetch(httpUploadUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fileName: finalFileName }),
+                body: formData, // O navegador define o Content-Type como multipart/form-data automaticamente
             });
 
             if (!response.ok) {
-                // Se a resposta não for bem-sucedida, lança um erro
-                throw new Error(`Falha ao obter a URL de upload (Status: ${response.status})`);
+                // Se a resposta do servidor não for bem-sucedida, lança um erro
+                throw new Error(`Falha no upload (Status: ${response.status})`);
             }
-            const data = await response.json();
-            const signedUrl = data.url;
-
-            // ETAPA B: Fazer o upload do arquivo para a URL recebida do Google
-            statusDiv.innerHTML = `<p>2/3: Enviando arquivo para o Cloud Storage...</p>`;
             
-            const uploadResponse = await fetch(signedUrl, {
-                method: 'PUT',
-                body: selectedFile,
-                headers: { 'Content-Type': 'application/octet-stream' }
-            });
-
-            if (!uploadResponse.ok) {
-                throw new Error('Falha no upload do arquivo para o Cloud Storage.');
-            }
-
-            // ETAPA C: Sucesso! Exibir o link para download do arquivo processado
-            statusDiv.innerHTML = `<p>3/3: Sucesso! Aguarde a conversão ser concluída...</p>`;
+            // --- Sucesso! Exibir o link para download do arquivo processado ---
+            statusDiv.innerHTML = `<p>Sucesso! O arquivo foi enviado e está sendo processado.</p>`;
             
             // Espera um tempo para dar à função de processamento tempo para executar
             setTimeout(() => {
@@ -91,11 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     resultFileName = `pdf_${originalBaseName}.pdf`;
                 } else if (actionPrefix === 'jpg') {
                     resultFileName = `converted_${originalBaseName}.jpg`;
-                } else if (actionPrefix === 'bw') {
-                    // Nossa função de P&B salva como jpg para consistência
-                    resultFileName = `bw_${originalBaseName}.jpg`;
                 } else {
-                    // Para sépia e outros filtros que mantêm o formato
                     resultFileName = `${actionPrefix}_${selectedFile.name}`;
                 }
 
@@ -104,13 +86,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 downloadLink.href = publicDownloadUrl;
                 downloadLink.textContent = `Download de ${resultFileName}`;
-                downloadLink.classList.remove('hidden'); // Mostra o botão de download
+                downloadLink.classList.remove('hidden'); // Mostra o botão de download 
                 
-                // Reabilita o botão para uma nova operação
                 uploadButton.disabled = false;
                 uploadButton.textContent = "Processar Outra Imagem";
 
-            }, 8000); // Espera 8 segundos (aumentamos para conversões mais complexas)
+            }, 8000); // Espera 8 segundos
 
         } catch (error) {
             console.error('Erro no processo:', error);

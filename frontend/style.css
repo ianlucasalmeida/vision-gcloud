@@ -1,8 +1,9 @@
-/* Estilos Gerais */
+/* --- Estilos Gerais e Variáveis de Cor --- */
 :root {
     --primary-color: #4285F4; /* Azul Google */
     --dark-bg: #202124;
     --secondary-bg: #3c4043;
+    --card-bg: #303134;
     --text-color: #e8eaed;
     --light-text-color: #bdc1c6;
     --success-color: #34A853; /* Verde Google */
@@ -23,11 +24,17 @@ body {
     min-height: 100vh;
 }
 
-/* Header e Footer */
+a {
+    text-decoration: none;
+    color: var(--primary-color);
+}
+
+/* --- Header e Footer --- */
 header, footer {
     background-color: #171717;
     text-align: center;
     padding: 1.5rem;
+    width: 100%;
 }
 
 header {
@@ -36,6 +43,7 @@ header {
 
 header h1 {
     color: var(--primary-color);
+    margin-bottom: 0.25rem;
 }
 
 header p {
@@ -50,7 +58,7 @@ footer {
     color: var(--light-text-color);
 }
 
-/* Contêiner Principal */
+/* --- Layout Principal --- */
 main {
     flex: 1;
     display: flex;
@@ -59,27 +67,82 @@ main {
     padding: 2rem;
 }
 
+/* --- Landing Page e Cards --- */
+.landing-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.card {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    width: 100%;
+    max-width: 320px;
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-color);
+    border: 1px solid var(--secondary-bg);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 25px rgba(66, 133, 244, 0.4);
+}
+
+.card h2 {
+    color: var(--primary-color);
+    border-bottom: none;
+    margin-bottom: 0.5rem;
+}
+
+.card p {
+    color: var(--light-text-color);
+}
+
+/* --- Páginas de Ferramentas (Conversor) --- */
 .container {
     width: 100%;
     max-width: 600px;
-    background-color: var(--secondary-bg);
+    background-color: var(--card-bg);
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     padding: 2rem;
 }
 
-h2 {
+.container h2 {
     color: var(--primary-color);
     border-bottom: 2px solid var(--primary-color);
     padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .result-section {
     margin-top: 2rem;
 }
 
-/* Estilos dos Botões e Inputs */
+/* --- Estilos de Formulários (Botões, Inputs, Selects) --- */
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: var(--light-text-color);
+}
+
+select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 1.5rem;
+    background-color: var(--secondary-bg);
+    color: var(--text-color);
+    border: 1px solid #5f6368;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
 .file-label, button, #downloadLink {
     display: block;
     width: 100%;
@@ -90,11 +153,12 @@ h2 {
     font-size: 1rem;
     font-weight: bold;
     transition: background-color 0.3s, transform 0.1s;
+    border: none;
 }
 
 .file-label {
     background-color: #5f6368;
-    margin-bottom: 1rem;
+    margin-top: 1rem;
 }
 
 .file-label:hover {
@@ -105,18 +169,20 @@ h2 {
     display: block;
     text-align: center;
     color: var(--light-text-color);
+    margin-top: 0.5rem;
     margin-bottom: 1.5rem;
     font-style: italic;
+    height: 1.2em;
 }
 
 button {
     background-color: var(--primary-color);
     color: white;
-    border: none;
 }
 
-button:hover {
+button:hover:not(:disabled) {
     background-color: #5a95f5;
+    transform: translateY(-2px);
 }
 
 button:disabled {
@@ -125,12 +191,13 @@ button:disabled {
     cursor: not-allowed;
 }
 
-/* Estilos da Seção de Resultado */
+/* --- Seção de Resultado --- */
 #status p {
     background-color: rgba(0,0,0,0.2);
     padding: 1rem;
     border-radius: 5px;
     text-align: center;
+    border: 1px solid var(--secondary-bg);
 }
 
 #downloadLink {
@@ -139,62 +206,11 @@ button:disabled {
     text-decoration: none;
     margin-top: 1rem;
 }
-
+    
 #downloadLink:hover {
     background-color: #4cc764;
 }
 
 .hidden {
     display: none;
-}
-
-/* --- ESTILOS ADICIONAIS PARA LANDING PAGE E CARDS --- */
-
-/* Contêiner da Landing Page */
-.landing-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 2rem; /* Espaçamento entre os cards */
-    padding: 2rem;
-}
-
-/* Estilo de cada Card */
-.card {
-    background-color: var(--secondary-bg);
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-    width: 100%;
-    max-width: 300px;
-    padding: 2rem;
-    text-align: center;
-    text-decoration: none; /* Remove o sublinhado do link */
-    color: var(--text-color);
-    transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.card:hover {
-    transform: translateY(-10px); /* Efeito de flutuar ao passar o mouse */
-    box-shadow: 0 8px 25px rgba(66, 133, 244, 0.5);
-}
-
-.card h2 {
-    color: var(--primary-color);
-    border-bottom: none; /* Remove a borda do H2 que tínhamos antes */
-    margin-bottom: 0.5rem;
-}
-
-.card p {
-    color: var(--light-text-color);
-}
-/* --- Estilos para o Menu de Seleção --- */
-select {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 1.5rem;
-    background-color: #5f6368;
-    color: var(--text-color);
-    border: none;
-    border-radius: 5px;
-    font-size: 1rem;
 }
