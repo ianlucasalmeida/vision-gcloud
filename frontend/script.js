@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Seleção de Elementos ---
+    // ===================================================================
+    // --- 1. SELEÇÃO DOS ELEMENTOS DA PÁGINA ---
+    // ===================================================================
     const fileInput = document.getElementById('fileInput');
     const conversionTypeSelect = document.getElementById('conversionType');
     const uploadButton = document.getElementById('uploadButton');
@@ -8,54 +10,73 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusDiv = document.getElementById('status');
     const downloadLink = document.getElementById('downloadLink');
 
-    // --- Lógica de Interação com a Página ---
+    // ===================================================================
+    // --- 2. CONFIGURAÇÃO DAS URLS DO BACKEND ---
+    // ===================================================================
+    // IMPORTANTE: Estas URLs devem ser as das suas funções na nuvem.
+    const UPLOAD_URL = "https://direct-upload-file-egxj6adibq-rj.a.run.app"; 
+    const DOWNLOAD_URL_GENERATOR = "https://stream-download-file-egxj6adibq-rj.a.run.app"; // Usando a nova função de streaming
+
     let selectedFile = null;
+
+    // ===================================================================
+    // --- 3. LÓGICA DE INTERAÇÃO COM A INTERFACE ---
+    // ===================================================================
     fileInput.addEventListener('change', (event) => {
         selectedFile = event.target.files[0];
         if (selectedFile) {
             fileNameSpan.textContent = selectedFile.name;
             uploadButton.disabled = false;
+            fileLabel.textContent = "Trocar Imagem";
         } else {
             fileNameSpan.textContent = "Nenhum arquivo selecionado";
             uploadButton.disabled = true;
+            fileLabel.textContent = "Escolher Imagem";
         }
     });
 
     // ===================================================================
-    // --- NOVA LÓGICA DE UPLOAD (MÉTODO DIRETO E SIMPLIFICADO) ---
+    // --- 4. LÓGICA PRINCIPAL DE UPLOAD E PROCESSAMENTO ---
     // ===================================================================
-    // IMPORTANTE: Cole a URL da sua NOVA função 'direct-upload-file' aqui
-    const UPLOAD_URL = "https://direct-upload-file-egxj6adibq-rj.a.run.app";
-
     uploadButton.addEventListener('click', async () => {
-        if (!selectedFile) return;
+        if (!selectedFile) {
+            alert("Por favor, selecione um arquivo primeiro.");
+            return;
+        }
 
+        // Reseta a interface para um novo processamento
         uploadButton.disabled = true;
         uploadButton.textContent = "Enviando...";
         statusDiv.innerHTML = `<p>Enviando arquivo para o servidor...</p>`;
         downloadLink.classList.add('hidden');
 
+        // Pega a opção de conversão do menu para montar o nome do arquivo
         const actionPrefix = conversionTypeSelect.value;
         const finalFileName = `${actionPrefix}_${selectedFile.name}`;
 
+        // Usa FormData para empacotar o arquivo para envio
         const formData = new FormData();
         formData.append('file', selectedFile, finalFileName);
 
         try {
-            const response = await fetch(UPLOAD_URL, {
+            // --- ETAPA A: Envia o arquivo para a função de upload direto ---
+            const uploadResponse = await fetch(UPLOAD_URL, {
                 method: 'POST',
                 body: formData,
             });
 
-            if (!response.ok) {
-                throw new Error(`Falha no upload (Status: ${response.status})`);
+            if (!uploadResponse.ok) {
+                throw new Error(`Falha no upload (Status: ${uploadResponse.status})`);
             }
             
-            statusDiv.innerHTML = `<p>Sucesso! O arquivo foi enviado e está sendo processado...</p>`;
+            // --- ETAPA B: Sucesso no upload, aguarda o processamento no backend ---
+            statusDiv.innerHTML = `<p>Sucesso! O arquivo foi enviado e está sendo processado... Isso pode levar alguns segundos.</p>`;
             
+            // Usamos um timeout para dar tempo da função de processamento ser acionada e concluir
             setTimeout(() => {
                 statusDiv.innerHTML = `<p>Processamento finalizado! Seu download está pronto.</p>`;
                 
+                // --- ETAPA C: Monta o link de download que aponta para nossa função "porteiro" ---
                 const originalBaseName = selectedFile.name.split('.').slice(0, -1).join('.');
                 let resultFileName;
                 
@@ -66,18 +87,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     resultFileName = `${actionPrefix}_${originalBaseName}.jpg`;
                 }
+
+                // O link agora aponta para a função que gera o download, passando o nome do arquivo
+                const downloadUrlWithParam = `${DOWNLOAD_URL_GENERATOR}?file=${resultFileName}`;
                 
-                const destinationBucket = 'vision-gcloud-processed';
-                const publicDownloadUrl = `https://storage.googleapis.com/${destinationBucket}/${resultFileName}`;
-                
-                downloadLink.href = publicDownloadUrl;
+                downloadLink.href = downloadUrlWithParam;
                 downloadLink.textContent = `Download de ${resultFileName}`;
-                downloadLink.classList.remove('hidden');
+                downloadLink.classList.remove('hidden'); // Mostra o botão de download
                 
                 uploadButton.disabled = false;
                 uploadButton.textContent = "Processar Outra Imagem";
 
-            }, 8000);
+            }, 8000); // Espera 8 segundos
 
         } catch (error) {
             console.error('Erro no processo:', error);
@@ -86,50 +107,4 @@ document.addEventListener('DOMContentLoaded', () => {
             uploadButton.textContent = "Tentar Novamente";
         }
     });
-
-    // ===================================================================
-    // --- LÓGICA ANTIGA (SALVAGUARDA - URL ASSINADA) ---
-    // ===================================================================
-    /*
-    const signedUrlGeneratorUrl = "COLE_A_URL_DA_FUNCAO_ANTIGA_GENERATE_UPLOAD_URL_AQUI";
-
-    uploadButton.addEventListener('click', async () => {
-        if (!selectedFile) return;
-
-        uploadButton.disabled = true;
-        uploadButton.textContent = "Processando...";
-        downloadLink.classList.add('hidden');
-
-        const actionPrefix = conversionTypeSelect.value;
-        const finalFileName = `${actionPrefix}_${selectedFile.name}`;
-
-        try {
-            statusDiv.innerHTML = `<p>1/3: Solicitando permissão de upload...</p>`;
-            const response = await fetch(signedUrlGeneratorUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fileName: finalFileName }),
-            });
-            if (!response.ok) { throw new Error('Falha ao obter a URL de upload.'); }
-            const data = await response.json();
-
-            statusDiv.innerHTML = `<p>2/3: Enviando arquivo...</p>`;
-            const uploadResponse = await fetch(data.url, {
-                method: 'PUT',
-                body: selectedFile,
-                headers: { 'Content-Type': 'application/octet-stream' }
-            });
-            if (!uploadResponse.ok) { throw new Error('Falha no upload do arquivo.'); }
-
-            statusDiv.innerHTML = `<p>3/3: Sucesso! Aguarde a conversão...</p>`;
-            
-            setTimeout(() => {
-                // ... lógica para exibir o link de download ...
-            }, 8000);
-
-        } catch (error) {
-            // ... lógica de tratamento de erro ...
-        }
-    });
-    */
 });
