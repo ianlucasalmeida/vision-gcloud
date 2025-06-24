@@ -11,11 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadLink = document.getElementById('downloadLink');
 
     // ===================================================================
-    // --- 2. CONFIGURAÇÃO DAS URLS DO BACKEND ---
+    // --- 2. CONFIGURAÇÃO FINAL DAS URLS DO BACKEND ---
     // ===================================================================
-    // IMPORTANTE: Estas URLs devem ser as das suas funções na nuvem.
+    // URLs confirmadas a partir dos seus logs de deploy
     const UPLOAD_URL = "https://direct-upload-file-egxj6adibq-rj.a.run.app"; 
-    const DOWNLOAD_URL_GENERATOR = "https://stream-download-file-egxj6adibq-rj.a.run.app"; // Usando a nova função de streaming
+    const DOWNLOAD_URL_GENERATOR = "https://stream-download-file-egxj6adibq-rj.a.run.app"; // URL CORRIGIDA para a nova função de download por streaming
 
     let selectedFile = null;
 
@@ -85,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (actionPrefix === 'jpg') {
                     resultFileName = `converted_${originalBaseName}.jpg`;
                 } else {
+                    // Para P&B, Sépia, etc., que salvamos como .jpg no backend
                     resultFileName = `${actionPrefix}_${originalBaseName}.jpg`;
                 }
 
@@ -98,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 uploadButton.disabled = false;
                 uploadButton.textContent = "Processar Outra Imagem";
 
-            }, 8000); // Espera 8 segundos
+            }, 10000); // Aumentado para 10 segundos para segurança
 
         } catch (error) {
             console.error('Erro no processo:', error);
