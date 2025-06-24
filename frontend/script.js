@@ -54,22 +54,29 @@ document.addEventListener('DOMContentLoaded', () => {
             // --- ETAPA ÚNICA: Enviar o arquivo diretamente para a função de upload ---
             const response = await fetch(httpUploadUrl, {
                 method: 'POST',
-                body: formData, // O navegador define o Content-Type como multipart/form-data automaticamente
+                body: formData,
             });
 
             if (!response.ok) {
-                // Se a resposta do servidor não for bem-sucedida, lança um erro
-                throw new Error(`Falha no upload (Status: ${response.status})`);
+                // Se a resposta do servidor não for bem-sucedida, tenta ler o corpo como JSON
+                const errorData = await response.json().catch(() => null);
+                if (errorData && errorData.traceback) {
+                    // Exibe o traceback do backend diretamente na tela
+                    statusDiv.innerHTML = `<p>ERRO NO BACKEND:</p><pre>${errorData.traceback}</pre>`;
+                } else {
+                    throw new Error(`Falha no upload (Status: ${response.status})`);
+                }
+                uploadButton.disabled = false;
+                uploadButton.textContent = "Tentar Novamente";
+                return;
             }
             
             // --- Sucesso! Exibir o link para download do arquivo processado ---
             statusDiv.innerHTML = `<p>Sucesso! O arquivo foi enviado e está sendo processado.</p>`;
             
-            // Espera um tempo para dar à função de processamento tempo para executar
             setTimeout(() => {
                 statusDiv.innerHTML = `<p>Processamento finalizado! Seu download está pronto.</p>`;
                 
-                // Lógica para montar o nome do arquivo de resultado corretamente
                 const originalBaseName = selectedFile.name.split('.').slice(0, -1).join('.');
                 let resultFileName;
                 
@@ -81,21 +88,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     resultFileName = `${actionPrefix}_${selectedFile.name}`;
                 }
 
-                const destinationBucket = 'vision-gcloud-processed'; // Seu bucket de destino
+                const destinationBucket = 'vision-gcloud-processed';
                 const publicDownloadUrl = `https://storage.googleapis.com/${destinationBucket}/${resultFileName}`;
                 
                 downloadLink.href = publicDownloadUrl;
                 downloadLink.textContent = `Download de ${resultFileName}`;
-                downloadLink.classList.remove('hidden'); // Mostra o botão de download 
+                downloadLink.classList.remove('hidden');
                 
                 uploadButton.disabled = false;
                 uploadButton.textContent = "Processar Outra Imagem";
 
-            }, 8000); // Espera 8 segundos
+            }, 8000);
 
         } catch (error) {
             console.error('Erro no processo:', error);
-            statusDiv.innerHTML = `<p>ERRO: ${error.message}</p>`;
+            
+            // --- MUDANÇA CRUCIAL PARA DEPURAÇÃO ---
+            if (error.response && typeof error.response.json === 'function') {
+                const errorData = await error.response.json();
+                statusDiv.innerHTML = `<p>ERRO NO BACKEND:</p><pre>${errorData.traceback}</pre>`;
+            } else {
+                statusDiv.innerHTML = `<p>ERRO: ${error.message}</p>`;
+            }
+            
             uploadButton.disabled = false;
             uploadButton.textContent = "Tentar Novamente";
         }
