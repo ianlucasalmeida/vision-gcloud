@@ -3,17 +3,16 @@ from google.cloud import storage
 import datetime
 import os
 
-# Lista de origens permitidas (seu site no Firebase)
 ALLOWED_ORIGINS = [
     'https://vision-gcloud.web.app',
-    'https://vision-gcloud.firebaseapp.com'
+    'https://vision-gcloud.firebaseapp.com',
+    'http://localhost:8000'
 ]
 
 @functions_framework.http
 def generate_upload_url(request):
     """
-    Função HTTP que gera uma URL assinada (Signed URL) para upload.
-    Utiliza uma conta de serviço dedicada para assinar a URL.
+    Função HTTP que gera uma URL assinada (Signed URL) V4 para upload.
     """
     origin = request.headers.get('Origin')
     cors_origin = origin if origin in ALLOWED_ORIGINS else ALLOWED_ORIGINS[0]
@@ -27,8 +26,8 @@ def generate_upload_url(request):
     if request.method == 'OPTIONS':
         return ('', 204, headers)
 
-    # --- Configurações lidas das variáveis de ambiente ---
     bucket_name = os.environ.get('UPLOAD_BUCKET_NAME')
+    # O email da conta de serviço que tem a permissão para assinar
     signing_sa_email = os.environ.get('SIGNING_SERVICE_ACCOUNT_EMAIL')
 
     if not bucket_name or not signing_sa_email:
@@ -46,14 +45,21 @@ def generate_upload_url(request):
     blob = bucket.blob(file_name)
 
     try:
-        signed_url = blob.generate_signed_url(
+        # --- CORREÇÃO FINAL E DEFINITIVA ---
+        # Em vez de a função assinar, pedimos ao Google para assinar
+        # usando a identidade da conta de serviço especificada.
+        url = blob.generate_signed_url(
             version="v4",
             expiration=datetime.timedelta(minutes=15),
             method="PUT",
             content_type="application/octet-stream",
-            service_account_email=signing_sa_email
+            # O Google usará a API IAM Credentials para assinar em nome desta conta.
+            # Isso requer que a conta que executa a função (a padrão) tenha o papel
+            # de "Criador de token da conta de serviço" na conta `signing_sa_email`.
+            service_account_email=signing_sa_email,
+            access_token=None # Força o uso do fluxo de assinatura do IAM
         )
-        return ({'url': signed_url}, 200, headers)
+        return ({'url': url}, 200, headers)
     except Exception as e:
         print(f"ERRO CRÍTICO ao gerar URL: {e}")
         return ('Erro interno ao gerar a URL.', 500, headers)
