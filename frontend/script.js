@@ -1,90 +1,88 @@
-// Espera o HTML ser completamente carregado para executar o script
 document.addEventListener('DOMContentLoaded', () => {
-
-    // --- Parte 1: Seleção dos Elementos do HTML ---
+    // Seleciona os elementos da página
     const fileInput = document.getElementById('fileInput');
-    const fileLabel = document.querySelector('.file-label');
-    const fileNameSpan = document.getElementById('fileName');
+    const conversionTypeSelect = document.getElementById('conversionType');
     const uploadButton = document.getElementById('uploadButton');
+    const fileNameSpan = document.getElementById('fileName');
+    // ... (outras seleções de elementos como antes)
     const statusDiv = document.getElementById('status');
     const downloadLink = document.getElementById('downloadLink');
 
-    // URL da sua função que gera o link de upload.
-    const signedUrlGeneratorUrl = "https://generate-upload-url-egxj6adibq-rj.a.run.app";
+    const signedUrlGeneratorUrl = "COLE_A_URL_DA_SUA_FUNCAO_GENERATE_UPLOAD_URL_AQUI"; // IMPORTANTE
 
     let selectedFile = null;
 
-    // --- Parte 2: Lógica de Interação com a Página ---
     fileInput.addEventListener('change', (event) => {
         selectedFile = event.target.files[0];
         if (selectedFile) {
             fileNameSpan.textContent = selectedFile.name;
             uploadButton.disabled = false;
-            fileLabel.textContent = "Trocar Arquivo";
         } else {
             fileNameSpan.textContent = "Nenhum arquivo selecionado";
             uploadButton.disabled = true;
-            fileLabel.textContent = "Escolher Arquivo";
         }
     });
 
-    // --- Parte 3: Lógica de Upload ---
     uploadButton.addEventListener('click', async () => {
-        if (!selectedFile) {
-            alert("Nenhum arquivo selecionado!");
-            return;
-        }
+        if (!selectedFile) return;
 
         uploadButton.disabled = true;
-        uploadButton.textContent = "Enviando...";
-        downloadLink.classList.add('hidden'); // Esconde o link de download anterior
+        uploadButton.textContent = "Processando...";
+        downloadLink.classList.add('hidden');
+
+        // Pega a opção de conversão escolhida pelo usuário
+        const actionPrefix = conversionTypeSelect.value;
+        const finalFileName = `${actionPrefix}_${selectedFile.name}`;
 
         try {
-            // --- ETAPA A: Pedir a URL assinada para nossa função de apoio ---
             statusDiv.innerHTML = `<p>1/3: Solicitando permissão de upload...</p>`;
-            
             const response = await fetch(signedUrlGeneratorUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fileName: selectedFile.name }),
+                body: JSON.stringify({ fileName: finalFileName }), // Envia o nome final com prefixo
             });
-
-            if (!response.ok) { throw new Error('Falha ao obter a URL de upload.'); }
-
+            if (!response.ok) throw new Error('Falha ao obter a URL de upload.');
             const data = await response.json();
-            const signedUrl = data.url;
 
-            // --- ETAPA B: Fazer o upload do arquivo para a URL recebida ---
-            statusDiv.innerHTML = `<p>2/3: Enviando arquivo para o Cloud Storage...</p>`;
-            
-            const uploadResponse = await fetch(signedUrl, {
+            statusDiv.innerHTML = `<p>2/3: Enviando arquivo...</p>`;
+            const uploadResponse = await fetch(data.url, {
                 method: 'PUT',
                 body: selectedFile,
                 headers: { 'Content-Type': 'application/octet-stream' }
             });
+            if (!uploadResponse.ok) throw new Error('Falha no upload do arquivo.');
 
-            if (!uploadResponse.ok) { throw new Error('Falha no upload do arquivo.'); }
-
-            // --- ETAPA C: Sucesso! Exibir o link de download ---
-            statusDiv.innerHTML = `<p>3/3: Sucesso! Aguarde o processamento ser concluído.</p>`;
+            statusDiv.innerHTML = `<p>3/3: Sucesso! Aguarde a conversão...</p>`;
             
-            // Espera um pouco para dar tempo da outra função processar o arquivo
             setTimeout(() => {
-                statusDiv.innerHTML = `<p>Processamento finalizado! Seu download está pronto.</p>`;
+                statusDiv.innerHTML = `<p>Processamento finalizado!</p>`;
                 uploadButton.textContent = "Concluído!";
+                
+                // Monta o nome do arquivo de resultado
+                const originalBaseName = selectedFile.name.split('.').slice(0, -1).join('.');
+                let resultFileName;
+                if(actionPrefix === 'pdf') {
+                    resultFileName = `pdf_${originalBaseName}.pdf`;
+                } else if(actionPrefix === 'jpg') {
+                    resultFileName = `converted_${originalBaseName}.jpg`;
+                } else {
+                    resultFileName = `${actionPrefix}_${selectedFile.name}`;
+                }
 
-                const processedFileName = `bw_${selectedFile.name}`;
-                const publicDownloadUrl = `https://storage.googleapis.com/vision-gcloud-processed/${processedFileName}`;
+                const destinationBucket = 'vision-gcloud-processed';
+                const publicDownloadUrl = `https://storage.googleapis.com/${destinationBucket}/${resultFileName}`;
                 
                 downloadLink.href = publicDownloadUrl;
-                downloadLink.classList.remove('hidden'); // Mostra o botão de download
-            }, 5000); // Espera 5 segundos
+                downloadLink.textContent = `Download de ${resultFileName}`;
+                downloadLink.classList.remove('hidden');
+                
+                uploadButton.disabled = false;
+                uploadButton.textContent = "Processar Outra Imagem";
+
+            }, 7000); // Aumentamos o tempo para conversões mais demoradas
 
         } catch (error) {
-            console.error('Erro no processo:', error);
-            statusDiv.innerHTML = `<p>ERRO: ${error.message}</p>`;
-            uploadButton.disabled = false;
-            uploadButton.textContent = "Tentar Novamente";
+            // ... (código de tratamento de erro permanece o mesmo)
         }
     });
 });

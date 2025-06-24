@@ -1,8 +1,11 @@
-# Para interagir com os buckets do Google Cloud Storage 
+# Para interagir com os buckets do Google Cloud Storage
 google-cloud-storage
 
-# Para processamento de imagens (ex: converter para preto e branco) 
+# Para processamento de imagens
 Pillow
 
-# Para a nova funcionalidade de converter DOCX para PDF 
+# Para converter DOCX para PDF
 docx2pdf
+
+# Para processamento de vídeo (extrair thumbnail)
+ffmpeg-python

@@ -1,0 +1,3 @@
+moviepy
+google-cloud-storage
+functions-framework

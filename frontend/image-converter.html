@@ -3,45 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vision-GCloud - Conversor de Arquivos</title>
+    <title>Ferramentas de Imagem - Vision-GCloud</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <header>
-        <h1>Vision-GCloud</h1>
-        <p>Seu Conversor de Arquivos Serverless</p>
+        <h1>Ferramentas de Imagem</h1>
+        <p>Escolha uma imagem e a operação desejada</p>
     </header>
-
     <main>
         <div class="container">
             <div class="upload-section">
-                <h2>1. Envie seu Arquivo</h2>
-                <p>Selecione um arquivo de imagem (.jpg, .png) para converter para preto e branco.</p>
+                <h2>1. Selecione a Imagem e a Ação</h2>
+                
+                <label for="conversionType">Escolha a conversão:</label>
+                <select id="conversionType">
+                    <option value="bw">Preto e Branco</option>
+                    <option value="sepia">Tom Sépia</option>
+                    <option value="pdf">Converter para PDF</option>
+                    <option value="jpg">Converter para JPG</option>
+                </select>
 
                 <input type="file" id="fileInput" accept="image/png, image/jpeg" hidden/>
-                <label for="fileInput" class="file-label">Escolher Arquivo</label>
+                <label for="fileInput" class="file-label">Escolher Imagem</label>
                 <span id="fileName">Nenhum arquivo selecionado</span>
-
-                <button id="uploadButton" disabled>Converter Arquivo</button>
+                <button id="uploadButton" disabled>Processar Imagem</button>
             </div>
-
             <div class="result-section">
                 <h2>2. Resultado</h2>
-                <div id="status">
-                    <p>Aguardando o envio do arquivo...</p>
-                </div>
-                <a href="#" id="downloadLink" class="hidden">
-                    Download do Arquivo Convertido
-                </a>
+                <div id="status"><p>Aguardando o envio do arquivo...</p></div>
+                <a href="#" id="downloadLink" class="hidden">Download do Arquivo Processado</a>
             </div>
         </div>
     </main>
-
-    <footer>
-        <p>&copy; 2025 Vision-GCloud. Todos os direitos reservados.</p>
-    </footer>
+    <footer><p>&copy; 2025 Vision-GCloud. <a href="index.html">Voltar para o início</a></p></footer>
     <script src="script.js"></script>
-
-    </body>
+</body>
 </html>
