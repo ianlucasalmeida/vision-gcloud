@@ -2,5 +2,6 @@ google-cloud-storage
 Pillow
 pillow-heif
 ffmpeg-python
-# Biblioteca para converter .docx para .pdf
 docx2pdf
+# Nova biblioteca para converter .odt
+odt2pdf 
