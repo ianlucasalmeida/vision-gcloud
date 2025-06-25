@@ -3,5 +3,4 @@ Pillow
 pillow-heif
 ffmpeg-python
 docx2pdf
-# Nova biblioteca para converter .odt
-odt2pdf 
+# A linha 'odt2pdf' foi removida.
