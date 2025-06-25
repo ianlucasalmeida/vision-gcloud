@@ -1,11 +1,6 @@
-# Para interagir com os buckets do Google Cloud Storage
 google-cloud-storage
-
-# Para processamento de imagens
 Pillow
-
-# Para converter DOCX para PDF
-docx2pdf
-
-# Para processamento de vídeo (extrair thumbnail)
+pillow-heif
 ffmpeg-python
+# Biblioteca para converter .docx para .pdf
+docx2pdf

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor de Documentos - Vision-GCloud</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Conversor de Documentos</h1>
+        <p>Envie um ficheiro .docx para convertê-lo em .pdf</p>
+    </header>
+    <main>
+        <div class="container">
+            <div class="upload-section">
+                <h2>1. Envie seu Documento</h2>
+                <p>Apenas ficheiros .docx são permitidos.</p>
+                
+                <input type="file" id="fileInput" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden/>
+                <label for="fileInput" class="file-label">Escolher Ficheiro (.docx)</label>
+                <span id="fileName">Nenhum ficheiro selecionado</span>
+                <button id="uploadButton" disabled>Converter para PDF</button>
+            </div>
+            <div class="result-section">
+                <h2>2. Resultado</h2>
+                <div id="status"><p>Aguardando o envio do ficheiro...</p></div>
+                <a href="#" id="downloadLink" class="hidden">Download do PDF</a>
+            </div>
+        </div>
+    </main>
+    <footer><p>&copy; 2025 Vision-GCloud. <a href="index.html">Voltar para o início</a></p></footer>
+    <script src="document-script.js"></script>
+</body>
+</html>
