@@ -1,14 +1,10 @@
-# Para interagir com o Google Cloud Storage
-google-cloud-storage
-
-# Para todo o processamento de imagens
-Pillow
-
-# Para suporte a ficheiros HEIF/HEIC (requer libheif no sistema)
-pillow-heif
-
-# Para processamento de vídeo (requer o binário ffmpeg no sistema)
-ffmpeg-python
-
-# A dependência 'docx2pdf' foi removida. A conversão agora usa
-# o LibreOffice, que deve ser instalado no ambiente de execução.
+# Versões "pinadas" que não usam a dependência obsoleta pkg_resources
+google-cloud-storage>=2.0.0
+Pillow>=9.0.0
+pillow-heif>=0.7.0
+ffmpeg-python>=0.2.0
+docx2pdf>=0.1.8
+functions-framework>=3.0.0
+Flask>=2.0.0
+werkzeug>=2.0.0
+moviepy>=1.0.3
