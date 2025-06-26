@@ -9,30 +9,36 @@
 <body>
     <header>
         <h1>Ferramentas de Imagem</h1>
-        <p>Escolha uma imagem e a operação desejada</p>
+        <p>Escolha uma imagem e a operação desejada para a conversão</p>
     </header>
     <main>
         <div class="container">
             <div class="upload-section">
                 <h2>1. Selecione a Imagem e a Ação</h2>
+                <p class="info-text">
+                    <!-- Mensagem clara para o utilizador -->
+                    Suporta ficheiros de imagem (JPG, PNG, HEIF, etc.) até 100MB. Imagens com transparência serão convertidas com um fundo branco.
+                </p>
                 
                 <label for="conversionType">Escolha a conversão:</label>
                 <select id="conversionType">
                     <option value="bw">Preto e Branco</option>
                     <option value="sepia">Tom Sépia</option>
-                    <option value="pdf">Converter para PDF</option>
+                    <option value="png">Converter para PNG</option>
                     <option value="jpg">Converter para JPG</option>
+                    <option value="image-to-pdf">Converter Imagem para PDF</option>
                 </select>
 
-                <input type="file" id="fileInput" accept="image/png, image/jpeg" hidden/>
+                <!-- Aceita uma vasta gama de formatos de imagem -->
+                <input type="file" id="fileInput" accept="image/*,.heif,.heic" hidden/>
                 <label for="fileInput" class="file-label">Escolher Imagem</label>
-                <span id="fileName">Nenhum arquivo selecionado</span>
+                <span id="fileName">Nenhum ficheiro selecionado</span>
                 <button id="uploadButton" disabled>Processar Imagem</button>
             </div>
             <div class="result-section">
                 <h2>2. Resultado</h2>
-                <div id="status"><p>Aguardando o envio do arquivo...</p></div>
-                <a href="#" id="downloadLink" class="hidden">Download do Arquivo Processado</a>
+                <div id="status"><p>Aguardando o envio do ficheiro...</p></div>
+                <a href="#" id="downloadLink" class="hidden">Download do Ficheiro Processado</a>
             </div>
         </div>
     </main>

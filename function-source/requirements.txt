@@ -1,6 +1,14 @@
+# Para interagir com o Google Cloud Storage
 google-cloud-storage
+
+# Para todo o processamento de imagens
 Pillow
+
+# Para suporte a ficheiros HEIF/HEIC (requer libheif no sistema)
 pillow-heif
+
+# Para processamento de vídeo (requer o binário ffmpeg no sistema)
 ffmpeg-python
-docx2pdf
-# A linha 'odt2pdf' foi removida.
+
+# A dependência 'docx2pdf' foi removida. A conversão agora usa
+# o LibreOffice, que deve ser instalado no ambiente de execução.
