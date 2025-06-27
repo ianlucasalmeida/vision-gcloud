@@ -1,12 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Seleção de Elementos
+    // A lógica é muito similar à do script de imagem, mas mais simples
     const fileInput = document.getElementById('fileInput');
     const uploadButton = document.getElementById('uploadButton');
     const fileNameSpan = document.getElementById('fileName');
     const statusDiv = document.getElementById('status');
     const downloadLink = document.getElementById('downloadLink');
 
-    // URLs de produção confirmadas (as mesmas de antes)
     const UPLOAD_URL = "https://direct-upload-file-egxj6adibq-rj.a.run.app"; 
     const DOWNLOAD_URL = "https://stream-download-file-egxj6adibq-rj.a.run.app";
 
@@ -28,9 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
         statusDiv.innerHTML = `<p>A enviar o ficheiro para o servidor...</p>`;
         downloadLink.classList.add('hidden');
 
-        // A ação para esta página é sempre a mesma
-        const action = 'docx-to-pdf';
-
+        const action = 'doc-to-pdf';
         const formData = new FormData();
         formData.append('file', selectedFile);
         formData.append('action', action);
@@ -42,22 +39,21 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             if (!uploadResponse.ok) throw new Error(`Falha no upload (Status: ${uploadResponse.status})`);
             
-            statusDiv.innerHTML = `<p>Sucesso! O ficheiro foi enviado e está a ser processado...</p>`;
+            statusDiv.innerHTML = `<p>Sucesso! A aguardar o processamento...</p>`;
             
             setTimeout(() => {
-                statusDiv.innerHTML = `<p>Processamento finalizado! O seu download está pronto.</p>`;
-                
                 const originalBaseName = selectedFile.name.split('.').slice(0, -1).join('.');
                 const resultFileName = `${originalBaseName}.pdf`;
-                const downloadUrlWithParam = `${DOWNLOAD_URL}?file=${resultFileName}`;
+                const downloadUrlWithParam = `${DOWNLOAD_URL}?file=${encodeURIComponent(resultFileName)}`;
                 
+                statusDiv.innerHTML = `<p>Conversão concluída!</p>`;
                 downloadLink.href = downloadUrlWithParam;
                 downloadLink.textContent = `Download de ${resultFileName}`;
                 downloadLink.classList.remove('hidden');
                 
                 uploadButton.disabled = false;
                 uploadButton.textContent = "Converter para PDF";
-            }, 15000); // 15 segundos para conversão de documentos
+            }, 25000); // Conversão de DOCX pode ser demorada
 
         } catch (error) {
             console.error('Erro no processo:', error);
