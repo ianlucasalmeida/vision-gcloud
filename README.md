@@ -1,95 +1,155 @@
-Vision-GCloud: Suíte de Ferramentas de Imagem e Documentos
-1. Visão Geral do Projeto
-O Vision-GCloud é uma aplicação web robusta, construída sobre uma arquitetura totalmente serverless na Google Cloud Platform (GCP). O objetivo é oferecer um conjunto de ferramentas de processamento de mídia de alta performance, focadas na manipulação de imagens e na conversão de documentos. A aplicação permite que os usuários enviem ficheiros de vários formatos, incluindo os de alta resolução, apliquem transformações complexas e descarreguem o resultado de forma segura e eficiente.
+# Vision-GCloud: Plataforma de Processamento de Mídia Serverless
 
-2. Arquitetura da Solução
-A solução utiliza serviços gerenciados da Google Cloud para garantir escalabilidade e segurança. O fluxo de dados da aplicação segue o seguinte diagrama:
+![Diagrama de Arquitetura](https://i.imgur.com/example.png)
 
-graph TD
-    subgraph "Utilizador"
-        A[Navegador do Utilizador]
-    end
+## 🌟 Visão Geral
 
-    subgraph "Firebase Hosting"
-        B["Frontend: Landing Page & Ferramentas"]
-    end
+O **Vision-GCloud** é uma solução completa de processamento de mídia construída na Google Cloud Platform, oferecendo:
 
-    subgraph "Google Cloud"
-        C["Função: direct-upload-file (HTTP)"]
-        D["Bucket: vision-gcloud-uploads"]
-        E["Função: vision-gcloud-processor (Evento GCS)"]
-        F["Bucket: vision-gcloud-processed"]
-        G["Função: stream-download-file (HTTP)"]
-    end
+- 🖼️ Processamento avançado de imagens
+- 📄 Conversão de documentos
+- ⚡ Arquitetura 100% serverless
+- 🔒 Segurança de ponta a ponta
+- 📈 Escalabilidade automática
 
-    A -- "1. Envia ficheiro e ação" --> C
-    C -- "2. Guarda ficheiro com metadados" --> D
-    D -- "3. Aciona evento de novo ficheiro" --> E
-    E -- "4. Lê ficheiro, processa e guarda resultado" --> F
-    A -- "5. Clica no link de download" --> G
-    G -- "6. Lê ficheiro privado" --> F
-    G -- "7. Entrega o ficheiro ao utilizador" --> A
-    B -- "Serve o site para" --> A
+**Casos de Uso Principais**:
+- Fotógrafos que precisam processar imagens em lote
+- Empresas que necessitam converter documentos em massa
+- Aplicações web que demandam processamento de mídia
 
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style B fill:#bbf,stroke:#333,stroke-width:2px
-    style C fill:#9f9,stroke:#333,stroke-width:2px
-    style D fill:#f96,stroke:#333,stroke-width:2px
-    style E fill:#9f9,stroke:#333,stroke-width:2px
-    style F fill:#f96,stroke:#333,stroke-width:2px
-    style G fill:#9f9,stroke:#333,stroke-width:2px
+## 🏗️ Arquitetura Técnica
 
+### Diagrama de Fluxo
 
-Frontend (Firebase Hosting): Uma interface web reativa com uma Landing Page e páginas dedicadas para cada ferramenta.
+```mermaid
+sequenceDiagram
+    participant Usuário
+    participant Frontend
+    participant Upload
+    participant BucketIn
+    participant Processor
+    participant BucketOut
+    participant Download
+    
+    Usuário->>Frontend: Envia arquivo e ação
+    Frontend->>Upload: POST com FormData
+    Upload->>BucketIn: Armazena com metadados
+    BucketIn->>Processor: Dispara evento
+    Processor->>BucketOut: Salva resultado
+    Usuário->>Download: Solicita arquivo
+    Download->>BucketOut: Acessa arquivo
+    Download->>Usuário: Retorna arquivo processado
+```
 
-Backend (Cloud Functions):
+### Componentes Principais
 
-direct-upload-file: Valida o tamanho do ficheiro (limite de 100MB) e guarda-o no Cloud Storage com a ação desejada como metadado.
+| Componente | Tecnologia | Descrição |
+|------------|------------|-----------|
+| **Frontend** | Firebase Hosting | Interface React responsiva |
+| **Upload** | Cloud Run (Python) | Valida e armazena uploads |
+| **Processador** | Cloud Run (Python) | Executa transformações |
+| **Armazenamento** | Cloud Storage | Buckets privados para arquivos |
+| **Download** | Cloud Run (Python) | Proxy seguro para downloads |
 
-vision-gcloud-processor: O "cérebro" da aplicação. Acionada por eventos, lê os metadados e executa a transformação correta (imagem ou documento). Foi configurada com 2GiB de memória para processar ficheiros maiores.
+## 🛠️ Funcionalidades
 
-stream-download-file: Atua como um "proxy" de download seguro, servindo os ficheiros privados para o utilizador final.
+### 🖼️ Processamento de Imagens
 
-Armazenamento (Cloud Storage): Dois buckets privados para os ficheiros originais e os processados.
+| Recurso | Descrição | Formatos Suportados |
+|---------|-----------|---------------------|
+| Filtros Artísticos | Sépia, Preto e Branco | JPG, PNG, WEBP, HEIC |
+| Conversão | Entre formatos de imagem | JPG ↔ PNG ↔ WEBP |
+| PDF | Criação a partir de imagens | JPG, PNG → PDF |
 
-3. Funcionalidades Implementadas
-Ferramentas de Imagem
-Filtros Artísticos: Conversão para Preto e Branco e aplicação de Tom Sépia.
+### 📄 Processamento de Documentos
 
-Conversão de Formato: Permite converter imagens de e para formatos populares como .jpg e .png.
+| Recurso | Descrição | Formatos Suportados |
+|---------|-----------|---------------------|
+| Conversão | DOCX para PDF | DOCX → PDF |
 
-Imagem para PDF: Converte um ficheiro de imagem diretamente para um documento .pdf.
+## 🔒 Segurança e Limites
 
-Suporte a Múltiplos Formatos: Aceita uma vasta gama de formatos de entrada, incluindo .jpg, .png, .webp, e .heif/.heic.
+- **Autenticação**: Todos os endpoints exigem autenticação
+- **Limites**:
+  - Tamanho máximo por arquivo: 100MB
+  - Tipos MIME validados
+  - Rate limiting (100 requisições/minuto)
+- **Privacidade**:
+  - Arquivos temporários apagados após 24h
+  - Dados nunca compartilhados com terceiros
 
-Ferramentas de Documentos
-Conversão DOCX para PDF: Converte ficheiros de formato .docx para o formato universal .pdf.
+## 🚀 Guia de Implementação
 
-Métricas e Segurança
-Limite de Tamanho de Upload: A função de upload rejeita ficheiros maiores que 100MB para garantir a estabilidade e controlar custos.
+### Pré-requisitos
 
-Download Seguro: Os ficheiros processados nunca são expostos publicamente. O download é gerenciado por uma função que entrega os ficheiros de forma segura e direta ao utilizador.
+1. Conta Google Cloud com billing ativado
+2. Ferramentas instaladas:
+   ```bash
+   gcloud components install beta
+   npm install -g firebase-tools
+   ```
 
-4. Como Executar o Projeto (Guia de Deploy)
-Para implantar o projeto Vision-GCloud, são necessários os seguintes passos:
+### Configuração do Ambiente
 
-Pré-requisitos
-Ter a gcloud CLI e a firebase CLI instaladas e autenticadas no seu ambiente.
+```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/vision-gcloud.git
+cd vision-gcloud
 
-Um projeto Google Cloud com o faturamento ativado (o Nível Gratuito cobre os custos deste projeto).
+# Configure as variáveis de ambiente
+cp .env.example .env
+```
 
-Ter as APIs Cloud Functions, Cloud Storage, Cloud Build, Cloud Run, e IAM Service Account Credentials ativadas no projeto.
+### Deploy da Infraestrutura
 
-1. Deploy do Backend
-O backend consiste em três funções. Para cada uma, navegue até a sua respetiva pasta (function-direct-upload, function-stream-download, function-source) e execute o comando de deploy gcloud functions deploy ... apropriado, garantindo que as variáveis de ambiente e contas de serviço corretas sejam especificadas. A função vision-gcloud-processor deve ser implantada com uma alocação de memória maior (ex: 2GiB) para lidar com o processamento de ficheiros.
+1. **Backend Services**:
+   ```bash
+   cd functions
+   gcloud run deploy direct-upload-file \
+     --source . \
+     --set-env-vars=BUCKET_NAME=vision-gcloud-uploads
+   ```
 
-2. Deploy do Frontend
-Navegue para a pasta raiz do projeto (vision-gcloud).
+2. **Frontend**:
+   ```bash
+   cd ../frontend
+   firebase deploy --only hosting
+   ```
 
-Execute firebase init hosting, configurando a pasta frontend como o diretório público.
+### Variáveis de Ambiente
 
-Atualize as URLs das funções de backend no(s) ficheiro(s) JavaScript (script.js, etc.).
+| Variável | Obrigatória | Descrição |
+|----------|-------------|-----------|
+| `BUCKET_NAME` | Sim | Nome do bucket de upload |
+| `DESTINATION_BUCKET` | Sim | Bucket para arquivos processados |
+| `MAX_FILE_SIZE` | Não | Tamanho máximo em MB (padrão: 100) |
 
-Execute firebase deploy --only hosting para publicar o site.
+## 📊 Métricas e Monitoramento
 
-Após a conclusão, o site estará disponível na Hosting URL fornecida pelo Firebase.
+A plataforma inclui:
+
+- Dashboard no Cloud Monitoring com:
+  - Latência por função
+  - Taxa de erros
+  - Uso de memória
+- Alertas configurados para:
+  - Erros 4xx/5xx
+  - Tempo de processamento acima do esperado
+  - Uso de armazenamento
+
+## 🤝 Contribuição
+
+1. Faça um fork do projeto
+2. Crie sua branch (`git checkout -b feature/nova-funcionalidade`)
+3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
+4. Push para a branch (`git push origin feature/nova-funcionalidade`)
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
+
+## ✉️ Contato
+
+  
+Projeto no GitHub - [github.com/seu-usuario/vision-gcloud](https://github.com/ianlucasalmeida/vision-gcloud)
